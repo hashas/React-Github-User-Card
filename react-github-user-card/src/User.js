@@ -10,23 +10,28 @@ class User extends React.Component {
             login: "",
             avatarURL: "",
             url: "",
-            followersURL: ""
+            followers: []
         }
     }
 
     componentDidMount() {
         axios
-            .get('https://api.github.com/users/mellownightpirate')
-            .then(res => {
-                console.log(this.state)
-                this.setState({
-                    login: res.data.login,
-                    avatarURL: res.data.avatar_url,
-                    url: res.data.url,
-                    followersURL: res.data.followers_url
+            .all([
+                axios.get('https://api.github.com/users/mellownightpirate'),
+                axios.get('https://api.github.com/users/mellownightpirate/followers')
+            ])
+            .then(
+                axios.spread((userRes, followerRes) => {
+                    console.log(userRes, followerRes)
+                    this.setState({
+                        login: userRes.data.login,
+                        avatarURL: userRes.data.avatar_url,
+                        url: userRes.data.url,
+                        followers: followerRes.data
                 })
                 console.log(this.state)
-            })
+                })
+            )
             .catch(err => {
                 console.log(err)
             })
@@ -39,7 +44,7 @@ class User extends React.Component {
                 <img src={this.state.avatarURL}/>
                 <div>{this.state.url}</div>
                 <Followers
-                    data={this.state.followersURL}
+                    data={this.state.followers}
                 />
             </div>
         )    
